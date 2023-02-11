@@ -1,6 +1,7 @@
 let origBoard;
 const huPlayer = 'O';
 const aiPlayer = 'X';
+let currPlayer = huPlayer;
 const winComb = [
     [0, 1, 2],
     [0, 3, 6],
@@ -26,12 +27,43 @@ const startGame = () => {
 }
 
 const turnClick = (square) => {
-    turn(square.target.id, aiPlayer);
+    turn(square.target.id, currPlayer );
 }
 
 const turn = (squareId, player) => {
     origBoard[squareId] = player;
     document.getElementById(squareId).innerText = player;
+
+    let gameWon = checkWin(origBoard, player);
+    if(gameWon) gameOver(gameWon);
+
+    if(currPlayer === huPlayer) currPlayer = aiPlayer;
+    else currPlayer = huPlayer;
+}
+
+const checkWin = (board, player) => {
+    let plays = board.reduce((a, e, i) =>
+        (e === player) ? a.concat(i) : a, []
+    );
+
+    let gameWon = null;
+    for(let i = 0; i< winComb.length; i++) {
+        if(winComb[i].every(num => plays.indexOf(num) != -1)) {
+            gameWon = {index: i, player: player};
+            break;
+        }
+    }
+    return gameWon;
+}
+
+const gameOver = (gameWon) => {
+    for(let i of winComb[gameWon.index]) {
+        document.getElementById(i).style.backgroundColor = (gameWon.player === huPlayer) ? "pink" : "red";
+    }
+
+    for(let i = 0; i< cells.length; i++) {
+        cells[i].removeEventListener('click', turnClick, false);
+    }
 }
 
 startGame();
